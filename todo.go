@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aquasecurity/table"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -15,6 +16,7 @@ type Todo struct {
 	CreatedAt time.Time
 	//CompletedAt is a pointer because it can be nil, i.e. when it is not completed
 	CompletedAt *time.Time
+	Priority    int
 }
 
 type Todos []Todo
@@ -86,7 +88,7 @@ func (todos *Todos) edit(index int, title string) error {
 func (todos *Todos) print() {
 	table := table.New(os.Stdout)
 	table.SetRowLines(false)
-	table.SetHeaders("#", "Title", "Completed", "Created At", "Completed At")
+	table.SetHeaders("#", "Title", "Completed", "Created At", "Completed At", "Priority")
 	for index, t := range *todos {
 		completed := "Ongoing"
 		completedAt := ""
@@ -97,7 +99,57 @@ func (todos *Todos) print() {
 				completedAt = t.CompletedAt.Format(time.RFC1123)
 			}
 		}
-		table.AddRow(strconv.Itoa(index), t.Title, completed, t.CreatedAt.Format(time.RFC1123), completedAt)
+		table.AddRow(strconv.Itoa(index), t.Title, completed, t.CreatedAt.Format(time.RFC1123), completedAt,
+			strconv.Itoa(t.Priority))
 	}
 	table.Render()
+}
+
+func (todos *Todos) setPriority(index int, input int) error {
+	t := *todos
+	err := t.validateIndex(index)
+	if err != nil {
+		return err
+	}
+
+	if 1 < input && input > 5 {
+		return errors.New("Priority level is between 1 and 5")
+	}
+
+	t[index].Priority = input
+	return nil
+}
+
+func (todos *Todos) sort(option string) error {
+	t := *todos
+	//sort by time
+	if option == "time" {
+		sort.Slice(t, func(i, j int) bool {
+			return t[i].CreatedAt.Before(t[j].CreatedAt)
+		})
+	} else if option == "priority" {
+		sort.Slice(t, func(i, j int) bool { return t[i].Priority < t[j].Priority })
+		fmt.Println("Sorted by priority:")
+		return nil
+	}
+	return errors.New("invalid option")
+}
+
+func (todos *Todos) filterByPriority(priority int) error {
+	t := *todos
+	filteredt := t
+	filterHolder := Todos{}
+	//filter by date
+	if priority > 5 {
+		return errors.New("invalid priority")
+	}
+	for _, t := range filteredt {
+		if t.Priority == priority {
+			filterHolder = append(filterHolder, t)
+		}
+	}
+
+	fmt.Println("Filtered by priority:")
+	filterHolder.print()
+	return nil
 }

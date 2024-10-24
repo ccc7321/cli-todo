@@ -1,14 +1,23 @@
 [
     {
+        "Title": "Add",
+        "Completed": true,
+        "CreatedAt": "2024-10-24T19:55:24.490096+01:00",
+        "CompletedAt": "2024-10-24T19:55:57.972181+01:00",
+        "Priority": 0
+    },
+    {
+        "Title": "Buy pork chop",
+        "Completed": false,
+        "CreatedAt": "2024-10-24T19:15:06.857887+01:00",
+        "CompletedAt": null,
+        "Priority": 2
+    },
+    {
         "Title": "buy milk",
         "Completed": true,
         "CreatedAt": "2024-10-24T19:15:06.857886+01:00",
-        "CompletedAt": "2024-10-24T19:15:06.857887+01:00"
-    },
-    {
-        "Title": "buy paper",
-        "Completed": false,
-        "CreatedAt": "2024-10-24T19:15:06.857887+01:00",
-        "CompletedAt": null
+        "CompletedAt": "2024-10-24T19:15:06.857887+01:00",
+        "Priority": 3
     }
 ]
