@@ -17,6 +17,8 @@ type CommandFlags struct {
 	Priority string
 	Sort     string
 	Filter   int
+	Tag      string
+	DelTag   string
 }
 
 func NewCmdFlags() *CommandFlags {
@@ -29,6 +31,8 @@ func NewCmdFlags() *CommandFlags {
 	flag.BoolVar(&cf.List, "list", false, "List all entries")
 	flag.StringVar(&cf.Sort, "sort", "", "sort all entries by either time or priority, expect input between 1 - 5")
 	flag.IntVar(&cf.Filter, "filter", -1, "Filter by priority")
+	flag.StringVar(&cf.Tag, "tag", "", "add tags with the following format 'index:tag 1, tag 2, tag 3'")
+	flag.StringVar(&cf.DelTag, "del-tag", "", "add tags with the following format 'index:tag 1'")
 	flag.StringVar(&cf.Priority, "priority", "", "Set priority for the task at hand, "+
 		"{first integer for the line index:second integer for priority level} {1:5}")
 
@@ -50,6 +54,30 @@ func (cf *CommandFlags) Execute(todos *Todos) {
 		todos.print()
 	case cf.Filter != -1:
 		todos.filterByPriority(cf.Filter)
+	case cf.Tag != "":
+		parts := strings.SplitN(cf.Tag, ":", 2)
+		if len(parts) != 2 {
+			fmt.Printf("Invalid edit: %v. Please input id:New:title", cf.Tag)
+		}
+		index, err := strconv.Atoi(parts[0])
+
+		if err != nil {
+			fmt.Println("Invalid index. Please input id:New:title")
+			os.Exit(1)
+		}
+		todos.setTags(index, parts[1])
+	case cf.DelTag != "":
+		parts := strings.SplitN(cf.DelTag, ":", 2)
+		if len(parts) != 2 {
+			fmt.Printf("Invalid edit: %v.\n Please input id:New:title", cf.DelTag)
+		}
+		index, err := strconv.Atoi(parts[0])
+
+		if err != nil {
+			fmt.Println("Invalid index. Please input id:New:title")
+			os.Exit(1)
+		}
+		todos.delTags(index, parts[1])
 	case cf.Sort != "":
 		todos.sort(cf.Sort)
 	case cf.Add != "":

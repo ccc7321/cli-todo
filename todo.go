@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/aquasecurity/table"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,6 +19,7 @@ type Todo struct {
 	//CompletedAt is a pointer because it can be nil, i.e. when it is not completed
 	CompletedAt *time.Time
 	Priority    int
+	Tags        []string
 }
 
 type Todos []Todo
@@ -88,7 +91,7 @@ func (todos *Todos) edit(index int, title string) error {
 func (todos *Todos) print() {
 	table := table.New(os.Stdout)
 	table.SetRowLines(false)
-	table.SetHeaders("#", "Title", "Completed", "Created At", "Completed At", "Priority")
+	table.SetHeaders("#", "Title", "Completed", "Created At", "Completed At", "Priority", "Tags")
 	for index, t := range *todos {
 		completed := "Ongoing"
 		completedAt := ""
@@ -100,7 +103,7 @@ func (todos *Todos) print() {
 			}
 		}
 		table.AddRow(strconv.Itoa(index), t.Title, completed, t.CreatedAt.Format(time.RFC1123), completedAt,
-			strconv.Itoa(t.Priority))
+			strconv.Itoa(t.Priority), strings.Join(t.Tags, ", "))
 	}
 	table.Render()
 }
@@ -152,4 +155,41 @@ func (todos *Todos) filterByPriority(priority int) error {
 	fmt.Println("Filtered by priority:")
 	filterHolder.print()
 	return nil
+}
+
+func (todos *Todos) setTags(index int, Tags string) error {
+	t := *todos
+	err := t.validateIndex(index)
+	if err != nil {
+		return err
+	}
+
+	//identify the commas between using regex and put it into slices
+	commaSplitter := regexp.MustCompile(`\s*,\s*`)
+	parts := commaSplitter.Split(Tags, -1)
+	t[index].Tags = parts
+	return nil
+}
+
+func (todos *Todos) delTags(index int, Tags string) error {
+	t := *todos
+	err := t.validateIndex(index)
+	tagMatched := false
+	if err != nil {
+		return err
+	}
+
+	for i, tag := range t[index].Tags {
+		if tag == Tags {
+			// Modify t[index].Tags directly instead of working on a copy
+			t[index].Tags = append(t[index].Tags[:i], t[index].Tags[i+1:]...)
+			tagMatched = true
+			break // Add break here since the slice is now modified
+		}
+	}
+
+	if tagMatched {
+		return nil
+	}
+	return fmt.Errorf("no matching tags found")
 }
