@@ -22,6 +22,58 @@ type Todo struct {
 	Tags        []string
 }
 
+// CoreFunctionOperator implements this contract or concrete implementation of the interface
+type CoreFunctionOperator struct {
+	todos   *Todos // Your todo list
+	storage Storage[Todos]
+}
+
+func NewCoreFunctionOperator(filePath string) *CoreFunctionOperator {
+	return &CoreFunctionOperator{
+		todos:   &Todos{},
+		storage: *NewStorage[Todos](filePath),
+	}
+}
+
+// Implement TodoOperator interface methods:
+func (c *CoreFunctionOperator) AddTodo(title string) error {
+	// 1. Validate title
+	// 2. Add to todos
+	c.todos.add(title)
+	return c.storage.Save(*c.todos)
+	// 3. Save to storage
+	// 4. Return any errors
+}
+
+func (c *CoreFunctionOperator) DeleteTodo(id int) error {
+	// 1. Validate id
+	// 2. Delete from todos
+	c.todos.delete(id)
+	// 3. Save changes
+	return c.storage.Save(*c.todos)
+	// 4. Return any errors
+}
+
+func (c *CoreFunctionOperator) EditTodo(id int, title string) error {
+	// 1. Validate id and title
+	// 2. Edit todo
+	c.todos.edit(id, title)
+	// 3. Save changes
+	return c.storage.Save(*c.todos)
+	// 4. Return any errors
+}
+
+func (c *CoreFunctionOperator) ToggleTodo(id int) error {
+	// 1. Validate id
+	// 2. Toggle completion
+	// 3. Update completion time
+	c.todos.toggle(id)
+	// 4. Save changes
+	return c.storage.Save(*c.todos)
+
+	// 5. Return any errors
+}
+
 type Todos []Todo
 
 // the add function is a pointer receiver function as it is only accessible with Todos pointer

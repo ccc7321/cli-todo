@@ -1,6 +1,7 @@
 package main
 
 import (
+	interfaces "cli-todo/pkg/interface"
 	"flag"
 	"fmt"
 	"os"
@@ -48,7 +49,7 @@ func NewCmdFlags() *CommandFlags {
 // and it should be a pointer because we want to alter the actual thing, not a copy of it
 // I know the cf.Sort refers to the command line input aka go run ./ - sort abc -> and it takes in abc but why
 // flag.StringVar store the input abc into the pointer of &cf.sort?
-func (cf *CommandFlags) Execute(todos *Todos) {
+func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) {
 	switch {
 	case cf.List:
 		todos.print()
@@ -81,7 +82,7 @@ func (cf *CommandFlags) Execute(todos *Todos) {
 	case cf.Sort != "":
 		todos.sort(cf.Sort)
 	case cf.Add != "":
-		todos.add(cf.Add)
+		operator.AddTodo(cf.Add)
 		fmt.Printf("Added %s\n", cf.Add)
 	case cf.Edit != "":
 		parts := strings.SplitN(cf.Edit, ":", 2)
