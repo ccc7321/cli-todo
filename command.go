@@ -75,16 +75,16 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 		}
 		todos.setTags(index, parts[1])
 	case cf.DelTag != "":
-		fmt.Println("del case")
+		fmt.Println("delTag case")
 
 		parts := strings.SplitN(cf.DelTag, ":", 2)
 		if len(parts) != 2 {
-			fmt.Printf("Invalid edit: %v.\n Please input id:New:title", cf.DelTag)
+			fmt.Printf("Invalid edit: %v.\n Please input 'index:tag 1'", cf.DelTag)
 		}
 		index, err := strconv.Atoi(parts[0])
 
 		if err != nil {
-			fmt.Println("Invalid index. Please input id:New:title")
+			fmt.Println("Invalid index. Please input 'index:tag 1'")
 			os.Exit(1)
 		}
 		todos.delTags(index, parts[1])
@@ -99,18 +99,20 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 		fmt.Printf("Added %s\n", cf.Add)
 	case cf.Edit != "":
 		fmt.Println("edit case")
+		fmt.Printf("%s\n", cf.Edit)
 
 		parts := strings.SplitN(cf.Edit, ":", 2)
 		if len(parts) != 2 {
 			fmt.Println("Invalid edit. Please input id:New:title")
 		}
 		index, err := strconv.Atoi(parts[0])
+		fmt.Printf("%d\n", index)
 
 		if err != nil {
 			fmt.Println("Invalid index. Please input id:New:title")
 			os.Exit(1)
 		}
-		todos.edit(index, parts[1])
+		operator.EditTodo(index, parts[1])
 		fmt.Printf("Editted %s for index %s\n", parts[1], parts[0])
 
 	case cf.Del != -1:
@@ -122,7 +124,7 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 	case cf.Toggle != -1:
 		fmt.Println("toggle case")
 
-		todos.toggle(cf.Toggle)
+		operator.ToggleTodo(cf.Toggle)
 
 	case cf.Priority != "":
 		fmt.Println("priority case")
