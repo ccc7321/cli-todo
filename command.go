@@ -50,12 +50,19 @@ func NewCmdFlags() *CommandFlags {
 // I know the cf.Sort refers to the command line input aka go run ./ - sort abc -> and it takes in abc but why
 // flag.StringVar store the input abc into the pointer of &cf.sort?
 func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) {
+	fmt.Printf("Execute state: Add='%s', Filter=%d\n", cf.Add, cf.Filter)
+
 	switch {
 	case cf.List:
 		todos.print()
+		fmt.Println("List case")
 	case cf.Filter != -1:
+		fmt.Println("Filter case")
+
 		todos.filterByPriority(cf.Filter)
 	case cf.Tag != "":
+		fmt.Println("Tag case")
+
 		parts := strings.SplitN(cf.Tag, ":", 2)
 		if len(parts) != 2 {
 			fmt.Printf("Invalid edit: %v. Please input id:New:title", cf.Tag)
@@ -68,6 +75,8 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 		}
 		todos.setTags(index, parts[1])
 	case cf.DelTag != "":
+		fmt.Println("del case")
+
 		parts := strings.SplitN(cf.DelTag, ":", 2)
 		if len(parts) != 2 {
 			fmt.Printf("Invalid edit: %v.\n Please input id:New:title", cf.DelTag)
@@ -80,11 +89,17 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 		}
 		todos.delTags(index, parts[1])
 	case cf.Sort != "":
+		fmt.Println("sort case")
+
 		todos.sort(cf.Sort)
 	case cf.Add != "":
+		fmt.Println("add case")
+
 		operator.AddTodo(cf.Add)
 		fmt.Printf("Added %s\n", cf.Add)
 	case cf.Edit != "":
+		fmt.Println("edit case")
+
 		parts := strings.SplitN(cf.Edit, ":", 2)
 		if len(parts) != 2 {
 			fmt.Println("Invalid edit. Please input id:New:title")
@@ -99,13 +114,19 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 		fmt.Printf("Editted %s for index %s\n", parts[1], parts[0])
 
 	case cf.Del != -1:
-		todos.delete(cf.Del)
-		fmt.Printf("Deleted %s\n", cf.Del)
+		fmt.Println("del case")
+
+		operator.DeleteTodo(cf.Del)
+		fmt.Printf("Deleted %d\n", cf.Del)
 
 	case cf.Toggle != -1:
+		fmt.Println("toggle case")
+
 		todos.toggle(cf.Toggle)
 
 	case cf.Priority != "":
+		fmt.Println("priority case")
+
 		parts := strings.SplitN(cf.Priority, ":", 2)
 		if len(parts) != 2 {
 			fmt.Println("Invalid priority. Please input [Int 1]:[Int 2]")
