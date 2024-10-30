@@ -7,5 +7,5 @@ func main() {
 	storage.Load(&todos)
 	cmdFlags := NewCmdFlags()
 	cmdFlags.Execute(operator, &todos)
-	storage.Save(todos)
+	//storage.Save(todos)
 }

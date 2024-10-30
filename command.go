@@ -123,7 +123,7 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 
 	case cf.Toggle != -1:
 		fmt.Println("toggle case")
-
+		fmt.Printf("%s\n", cf.Toggle)
 		operator.ToggleTodo(cf.Toggle)
 
 	case cf.Priority != "":

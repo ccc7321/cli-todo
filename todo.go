@@ -29,10 +29,12 @@ type CoreFunctionOperator struct {
 }
 
 func NewCoreFunctionOperator(filePath string) *CoreFunctionOperator {
-	return &CoreFunctionOperator{
+	c := &CoreFunctionOperator{
 		todos:   &Todos{},
 		storage: *NewStorage[Todos](filePath),
 	}
+	c.storage.Load(c.todos)
+	return c
 }
 
 // Implement TodoOperator interface methods:
@@ -64,14 +66,33 @@ func (c *CoreFunctionOperator) EditTodo(id int, title string) error {
 }
 
 func (c *CoreFunctionOperator) ToggleTodo(id int) error {
-	// 1. Validate id
-	// 2. Toggle completion
-	// 3. Update completion time
-	c.todos.toggle(id)
-	// 4. Save changes
-	return c.storage.Save(*c.todos)
+	fmt.Printf("id is %d\n", id)
+	fmt.Printf("todos is %v\n", *c.todos)
+	err := c.storage.Load(c.todos)
+	fmt.Printf("todos is %v\n", *c.todos)
+	if err != nil {
+		return fmt.Errorf("Something wrong")
+	}
 
-	// 5. Return any errors
+	err = c.todos.validateIndex(id)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("First %v", (*c.todos)[id].Completed)
+	isCompleted := (*c.todos)[id].Completed
+	if !isCompleted {
+		completionTime := time.Now()
+		(*c.todos)[id].CompletedAt = &completionTime
+		fmt.Printf("2nd %v", (*c.todos)[id].Completed)
+	}
+
+	(*c.todos)[id].Completed = !(*c.todos)[id].Completed
+	fmt.Printf("3rd %v", (*c.todos)[id].Completed)
+	c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
 }
 
 type Todos []Todo
@@ -89,7 +110,7 @@ func (todos *Todos) add(title string) {
 
 func (todos *Todos) validateIndex(index int) error {
 	if index < 0 || index >= len(*todos) {
-		err := errors.New("invalid index")
+		err := fmt.Errorf("invalid index, actual lebgth: %d", len(*todos))
 		fmt.Println(err)
 		return err
 	}
