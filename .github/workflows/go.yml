@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest    # Using GitHub's Ubuntu runner instead of self-hosted
     steps:
       - uses: actions/checkout@v3
       
