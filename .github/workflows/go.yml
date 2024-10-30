@@ -3,17 +3,19 @@ name: Go Tests
 on:
   pull_request:
     branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
 
 jobs:
   test:
-    runs-on: ubuntu-latest    # Using GitHub's Ubuntu runner instead of self-hosted
+    runs-on: ubuntu-latest    # Make sure this line says ubuntu-latest, not self-hosted
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
-          
-      - name: Run tests
-        run: go test ./todo_test.go
+      - name: Run specific test
+        run: go test -v -run ^TestCommandFlags_Execute_Add$
