@@ -6,6 +6,7 @@ func main() {
 	operator := NewCoreFunctionOperator("todos.json")
 	storage.Load(&todos)
 	cmdFlags := NewCmdFlags()
-	cmdFlags.Execute(operator, &todos)
+	cmdFlags.Execute(operator)
 	storage.Save(todos)
+	operator.storage.Save(*operator.todos)
 }

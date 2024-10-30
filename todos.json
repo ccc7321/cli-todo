@@ -1,19 +1,9 @@
 [
     {
-        "Title": "Add",
-        "Completed": true,
-        "CreatedAt": "2024-10-24T19:55:24.490096+01:00",
-        "CompletedAt": "2024-10-24T19:55:57.972181+01:00",
-        "Priority": 0,
-        "Tags": [
-            "shopping"
-        ]
-    },
-    {
-        "Title": "Buy video games",
+        "Title": "buy takeaway",
         "Completed": false,
         "CreatedAt": "2024-10-24T19:15:06.857887+01:00",
-        "CompletedAt": null,
+        "CompletedAt": "2024-10-30T21:27:17.764691Z",
         "Priority": 2,
         "Tags": null
     },
@@ -24,5 +14,15 @@
         "CompletedAt": "2024-10-24T19:15:06.857887+01:00",
         "Priority": 3,
         "Tags": null
+    },
+    {
+        "Title": "Add",
+        "Completed": true,
+        "CreatedAt": "2024-10-24T19:55:24.490096+01:00",
+        "CompletedAt": "2024-10-24T19:55:57.972181+01:00",
+        "Priority": 5,
+        "Tags": [
+            "shopping"
+        ]
     }
 ]

@@ -29,114 +29,163 @@ type CoreFunctionOperator struct {
 }
 
 func NewCoreFunctionOperator(filePath string) *CoreFunctionOperator {
-	return &CoreFunctionOperator{
+	c := &CoreFunctionOperator{
 		todos:   &Todos{},
 		storage: *NewStorage[Todos](filePath),
 	}
+	c.storage.Load(c.todos)
+	return c
 }
 
 // Implement TodoOperator interface methods:
+// the add function is a pointer receiver function as it receives CoreFunctionOperator
 func (c *CoreFunctionOperator) AddTodo(title string) error {
 	// 1. Validate title
 	// 2. Add to todos
-	c.todos.add(title)
-	return c.storage.Save(*c.todos)
-	// 3. Save to storage
-	// 4. Return any errors
-}
-
-func (c *CoreFunctionOperator) DeleteTodo(id int) error {
-	// 1. Validate id
-	// 2. Delete from todos
-	c.todos.delete(id)
-	// 3. Save changes
-	return c.storage.Save(*c.todos)
-	// 4. Return any errors
-}
-
-func (c *CoreFunctionOperator) EditTodo(id int, title string) error {
-	// 1. Validate id and title
-	// 2. Edit todo
-	c.todos.edit(id, title)
-	// 3. Save changes
-	return c.storage.Save(*c.todos)
-	// 4. Return any errors
-}
-
-func (c *CoreFunctionOperator) ToggleTodo(id int) error {
-	// 1. Validate id
-	// 2. Toggle completion
-	// 3. Update completion time
-	c.todos.toggle(id)
-	// 4. Save changes
-	return c.storage.Save(*c.todos)
-
-	// 5. Return any errors
-}
-
-type Todos []Todo
-
-// the add function is a pointer receiver function as it is only accessible with Todos pointer
-func (todos *Todos) add(title string) {
 	todo := Todo{
 		Title:       title,
 		Completed:   false,
 		CreatedAt:   time.Now(),
 		CompletedAt: nil,
 	}
-	*todos = append(*todos, todo)
-}
+	*c.todos = append(*c.todos, todo)
 
-func (todos *Todos) validateIndex(index int) error {
-	if index < 0 || index >= len(*todos) {
-		err := errors.New("invalid index")
-		fmt.Println(err)
-		return err
+	err := c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
 	}
+
+	// 4. Return any errors
 	return nil
 }
 
-// the delete function that receives a pointer - *Todos
-func (todos *Todos) delete(index int) error {
-	err := todos.validateIndex(index)
+func (c *CoreFunctionOperator) DeleteTodo(index int) error {
+	// 1. Validate id
+	// 2. Delete from todos
+	err := c.todos.validateIndex(index)
 	if err != nil {
 		return err
 	}
 
-	todosList := *todos
+	todosList := *c.todos
 
-	*todos = append(todosList[:index], todosList[index+1:]...)
-
-	return nil
-}
-
-func (todos *Todos) toggle(index int) error {
-	t := *todos
-	err := t.validateIndex(index)
+	*c.todos = append(todosList[:index], todosList[index+1:]...)
+	// 3. Save changes
+	err = c.storage.Save(*c.todos)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save: %w", err)
 	}
-
-	isCompleted := t[index].Completed
-	if !isCompleted {
-		completionTime := time.Now()
-		t[index].CompletedAt = &completionTime
-	}
-
-	t[index].Completed = !t[index].Completed
-
+	// 4. Return any errors
 	return nil
 }
 
-func (todos *Todos) edit(index int, title string) error {
-	t := *todos
+func (c *CoreFunctionOperator) EditTodo(index int, title string) error {
+	// 1. Validate id and title
+	// 2. Edit todo
+	t := *c.todos
 	err := t.validateIndex(index)
 	if err != nil {
 		return err
 	}
 
 	t[index].Title = title
+	// 3. Save changes
+	err = c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	// 4. Return any errors
+	return nil
+}
 
+func (c *CoreFunctionOperator) ToggleTodo(id int) error {
+	fmt.Printf("id is %d\n", id)
+	fmt.Printf("todos is %v\n", *c.todos)
+	err := c.storage.Load(c.todos)
+	fmt.Printf("todos is %v\n", *c.todos)
+	if err != nil {
+		return fmt.Errorf("Something wrong")
+	}
+
+	err = c.todos.validateIndex(id)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("First %v", (*c.todos)[id].Completed)
+	isCompleted := (*c.todos)[id].Completed
+	if !isCompleted {
+		completionTime := time.Now()
+		(*c.todos)[id].CompletedAt = &completionTime
+		fmt.Printf("2nd %v", (*c.todos)[id].Completed)
+	}
+
+	(*c.todos)[id].Completed = !(*c.todos)[id].Completed
+	fmt.Printf("3rd %v", (*c.todos)[id].Completed)
+
+	c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
+}
+
+func (c *CoreFunctionOperator) Print() {
+	c.todos.print()
+}
+
+func (c *CoreFunctionOperator) SetPriority(id int, input int) error {
+	c.todos.setPriority(id, input)
+	err := c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
+}
+
+func (c *CoreFunctionOperator) Sort(option string) error {
+	c.todos.sort(option)
+	err := c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
+}
+
+func (c *CoreFunctionOperator) FilterByPriority(id int) error {
+	c.todos.filterByPriority(id)
+	err := c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
+}
+
+func (c *CoreFunctionOperator) SetTags(id int, tags string) error {
+	c.todos.setTags(id, tags)
+	err := c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
+}
+
+func (c *CoreFunctionOperator) DelTags(id int, tags string) error {
+	c.todos.delTags(id, tags)
+	err := c.storage.Save(*c.todos)
+	if err != nil {
+		return fmt.Errorf("failed to save: %w", err)
+	}
+	return nil
+}
+
+type Todos []Todo
+
+func (todos *Todos) validateIndex(index int) error {
+	if index < 0 || index >= len(*todos) {
+		err := fmt.Errorf("invalid index, actual lebgth: %d", len(*todos))
+		fmt.Println(err)
+		return err
+	}
 	return nil
 }
 
