@@ -49,17 +49,17 @@ func NewCmdFlags() *CommandFlags {
 // and it should be a pointer because we want to alter the actual thing, not a copy of it
 // I know the cf.Sort refers to the command line input aka go run ./ - sort abc -> and it takes in abc but why
 // flag.StringVar store the input abc into the pointer of &cf.sort?
-func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) {
+func (cf *CommandFlags) Execute(operator interfaces.TodoOperator) {
 	fmt.Printf("Execute state: Add='%s', Filter=%d\n", cf.Add, cf.Filter)
 
 	switch {
 	case cf.List:
-		todos.print()
+		operator.Print()
 		fmt.Println("List case")
 	case cf.Filter != -1:
 		fmt.Println("Filter case")
 
-		todos.filterByPriority(cf.Filter)
+		operator.FilterByPriority(cf.Filter)
 	case cf.Tag != "":
 		fmt.Println("Tag case")
 
@@ -73,7 +73,8 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 			fmt.Println("Invalid index. Please input id:New:title")
 			os.Exit(1)
 		}
-		todos.setTags(index, parts[1])
+
+		operator.SetTags(index, parts[1])
 	case cf.DelTag != "":
 		fmt.Println("delTag case")
 
@@ -87,11 +88,11 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 			fmt.Println("Invalid index. Please input 'index:tag 1'")
 			os.Exit(1)
 		}
-		todos.delTags(index, parts[1])
+		operator.DelTags(index, parts[1])
 	case cf.Sort != "":
 		fmt.Println("sort case")
 
-		todos.sort(cf.Sort)
+		operator.Sort(cf.Sort)
 	case cf.Add != "":
 		fmt.Println("add case")
 
@@ -123,7 +124,7 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 
 	case cf.Toggle != -1:
 		fmt.Println("toggle case")
-		fmt.Printf("%s\n", cf.Toggle)
+		fmt.Printf("%d\n", cf.Toggle)
 		operator.ToggleTodo(cf.Toggle)
 
 	case cf.Priority != "":
@@ -135,7 +136,7 @@ func (cf *CommandFlags) Execute(operator interfaces.TodoOperator, todos *Todos) 
 		}
 		int1, _ := strconv.Atoi(parts[0])
 		int2, _ := strconv.Atoi(parts[1])
-		todos.setPriority(int1, int2)
+		operator.SetPriority(int1, int2)
 		fmt.Printf("Set priority for index %d to %d\n", int1, int2)
 	default:
 		fmt.Println("Invalid Command")

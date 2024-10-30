@@ -20,6 +20,7 @@ type MockTodoOperator struct {
 	EditWasCalled   bool
 	EditedTitles    []string
 	ToggleWasCalled bool
+	ToggleIndex     int
 	mockTodos       Todos
 }
 
@@ -81,15 +82,43 @@ func (m *MockTodoOperator) ToggleTodo(id int) error {
 	if m.ShouldError {
 		return errors.New("Error")
 	}
-	m.mockTodos = mockTodos
-	m.mockTodos.toggle(id)
+	todos := m.mockTodos
+	todos[id].Completed = !todos[id].Completed
+
+	// Set completion time if being marked as complete
+	if todos[id].Completed {
+		now := time.Now()
+		todos[id].CompletedAt = &now
+	} else {
+		todos[id].CompletedAt = nil
+	}
+
+	m.ToggleIndex = id
 	return nil
+}
+
+func (m *MockTodoOperator) SetPriority(index int, input int) error {
+	return nil
+}
+func (m *MockTodoOperator) Sort(option string) error {
+	return nil
+}
+func (m *MockTodoOperator) FilterByPriority(priority int) error {
+	return nil
+}
+func (m *MockTodoOperator) SetTags(index int, Tags string) error {
+	return nil
+}
+func (m *MockTodoOperator) DelTags(index int, Tags string) error {
+	return nil
+}
+func (m *MockTodoOperator) Print() {
+
 }
 
 // If you prefer separate test functions:
 func TestCommandFlags_Execute_Add(t *testing.T) {
 	mock := &MockTodoOperator{}
-	todos := &Todos{}
 
 	flags := CommandFlags{
 		Add:    "buy milk",
@@ -98,7 +127,7 @@ func TestCommandFlags_Execute_Add(t *testing.T) {
 		Toggle: -1,
 	}
 
-	flags.Execute(mock, todos)
+	flags.Execute(mock)
 
 	assert.True(t, mock.AddWasCalled)
 	assert.Equal(t, 1, len(mock.AddedTitles))
@@ -106,10 +135,23 @@ func TestCommandFlags_Execute_Add(t *testing.T) {
 }
 
 func TestCommandFlags_Execute_Delete(t *testing.T) {
-	mock := &MockTodoOperator{}
-	todos := Todos{
-		{Title: "buy milk", Completed: false},
-		{Title: "buy video games", Completed: true},
+	initialTodos := Todos{
+		{
+			Title:     "buy milk",
+			Completed: false,
+			CreatedAt: time.Now(),
+		},
+		{
+			Title:     "buy video games",
+			Completed: true,
+			CreatedAt: time.Now(),
+		},
+	}
+
+	// Initialize the mock with the todos
+	mock := &MockTodoOperator{
+		mockTodos:   initialTodos,
+		ShouldError: false,
 	}
 
 	flags := CommandFlags{
@@ -119,19 +161,31 @@ func TestCommandFlags_Execute_Delete(t *testing.T) {
 		Toggle: -1,
 	}
 
-	flags.Execute(mock, &todos)
+	flags.Execute(mock)
 
 	assert.True(t, mock.DelWasCalled)
 	assert.Equal(t, 0, mock.DeletedIndex)
 }
 
 func TestCommandFlags_Execute_Edit(t *testing.T) {
-	mock := &MockTodoOperator{}
-	todos := Todos{
-		{Title: "buy milk", Completed: false},
-		{Title: "buy video games", Completed: true},
+	initialTodos := Todos{
+		{
+			Title:     "buy milk",
+			Completed: false,
+			CreatedAt: time.Now(),
+		},
+		{
+			Title:     "buy video games",
+			Completed: true,
+			CreatedAt: time.Now(),
+		},
 	}
 
+	// Initialize the mock with the todos
+	mock := &MockTodoOperator{
+		mockTodos:   initialTodos,
+		ShouldError: false,
+	}
 	flags := CommandFlags{
 		Filter: -1,
 		Del:    -1,
@@ -139,26 +193,38 @@ func TestCommandFlags_Execute_Edit(t *testing.T) {
 		Edit:   "0:buy chocolate milk",
 	}
 	fmt.Printf("%s\n", flags.Edit)
-	flags.Execute(mock, &todos)
+	flags.Execute(mock)
 
 	assert.True(t, mock.EditWasCalled)
 	assert.Equal(t, "buy chocolate milk", mock.EditedTitles[0])
 }
 
 func TestCommandFlags_Execute_Toggle(t *testing.T) {
-	mock := &MockTodoOperator{}
-	todos := Todos{
-		{Title: "buy milk", Completed: false},
-		{Title: "buy video games", Completed: true},
+	initialTodos := Todos{
+		{
+			Title:     "buy milk",
+			Completed: false,
+			CreatedAt: time.Now(),
+		},
+		{
+			Title:     "buy video games",
+			Completed: true,
+			CreatedAt: time.Now(),
+		},
 	}
 
+	// Initialize the mock with the todos
+	mock := &MockTodoOperator{
+		mockTodos:   initialTodos,
+		ShouldError: false,
+	}
 	flags := CommandFlags{
 		Filter: -1,
 		Del:    -1,
 		Toggle: 0,
 	}
 	fmt.Printf("%s\n", flags.Edit)
-	flags.Execute(mock, &todos)
+	flags.Execute(mock)
 
 	assert.True(t, mock.ToggleWasCalled)
 	assert.Equal(t, true, mock.mockTodos[0].Completed)

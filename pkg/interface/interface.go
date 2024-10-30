@@ -6,4 +6,10 @@ type TodoOperator interface {
 	DeleteTodo(id int) error
 	EditTodo(id int, title string) error
 	ToggleTodo(id int) error
+	SetPriority(index int, input int) error
+	Sort(option string) error
+	FilterByPriority(priority int) error
+	SetTags(index int, Tags string) error
+	DelTags(index int, Tags string) error
+	Print()
 }
