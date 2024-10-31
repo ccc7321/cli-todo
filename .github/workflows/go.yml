@@ -1,18 +1,49 @@
-name: Test PR to see why this is not running
-on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
 jobs:
-  test:
-    name: test go.yml to see why ubuntu-latest is not being initialised
-    runs-on: [self-hosted, macOS-latest]
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Add timeout to prevent hanging
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.20'
-      - name: Run specific test
-        run: go test -v -run ^TestCommandFlags_Execute_Add$
+    - uses: actions/checkout@v4
+
+    # Add better debugging information
+    - name: Debug Information
+      run: |
+        echo "GitHub Runner OS: ${{ runner.os }}"
+        echo "GitHub Runner Arch: ${{ runner.arch }}"
+        echo "GitHub Runner Name: ${{ runner.name }}"
+        df -h
+        free -h
+        nproc
+
+    # Test network connectivity
+    - name: Test Network
+      run: |
+        curl -v https://api.github.com
+        ping -c 4 8.8.8.8
+
+    # Add initialization check
+    - name: Check Environment
+      run: |
+        if [ -z "$GITHUB_WORKSPACE" ]; then
+          echo "GITHUB_WORKSPACE is not set!"
+          exit 1
+        fi
+        echo "Working directory: $GITHUB_WORKSPACE"
+        ls -la
+
+    # Your original build steps would go here
+    - name: Build
+      run: |
+        # Add your build commands here
+        echo "Starting build process..."
+      continue-on-error: false  # Force stop on error
+
+    # Add error capture
+    - name: Error Capture
+      if: failure()
+      run: |
+        echo ":::ERROR DIAGNOSTICS:::"
+        dmesg | tail -n 50
+        journalctl -n 50
+        ps aux
