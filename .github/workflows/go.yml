@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     name: test go.yml to see why ubuntu-latest is not being initialised
-    runs-on: [self-hosted, macos-latest]
+    runs-on: [self-hosted, macOS-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
