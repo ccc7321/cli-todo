@@ -13,3 +13,8 @@ type TodoOperator interface {
 	DelTags(index int, Tags string) error
 	Print()
 }
+
+type StorageInterface[T any] interface {
+	Save(data T) error
+	Load(target *T) error
+}

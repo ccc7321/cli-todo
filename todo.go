@@ -1,6 +1,7 @@
 package main
 
 import (
+	interfaces "cli-todo/pkg/interface"
 	"errors"
 	"fmt"
 	"github.com/aquasecurity/table"
@@ -25,13 +26,13 @@ type Todo struct {
 // CoreFunctionOperator implements this contract or concrete implementation of the interface
 type CoreFunctionOperator struct {
 	todos   *Todos // Your todo list
-	storage Storage[Todos]
+	storage interfaces.StorageInterface[Todos]
 }
 
 func NewCoreFunctionOperator(filePath string) *CoreFunctionOperator {
 	c := &CoreFunctionOperator{
 		todos:   &Todos{},
-		storage: *NewStorage[Todos](filePath),
+		storage: NewStorage[Todos](filePath),
 	}
 	c.storage.Load(c.todos)
 	return c
@@ -40,8 +41,8 @@ func NewCoreFunctionOperator(filePath string) *CoreFunctionOperator {
 // Implement TodoOperator interface methods:
 // the add function is a pointer receiver function as it receives CoreFunctionOperator
 func (c *CoreFunctionOperator) AddTodo(title string) error {
-	// 1. Validate title
-	// 2. Add to todos
+	fmt.Printf("Checking if title is being passed: %s\n", title)
+	fmt.Printf("Checking what the todo struct looks like here in CoreFunctionOperator before: %v\n", *c.todos)
 	todo := Todo{
 		Title:       title,
 		Completed:   false,
@@ -49,6 +50,7 @@ func (c *CoreFunctionOperator) AddTodo(title string) error {
 		CompletedAt: nil,
 	}
 	*c.todos = append(*c.todos, todo)
+	fmt.Printf("Checking what the todo struct looks like in CoreFunctionOperator after: %v\n", *c.todos)
 
 	err := c.storage.Save(*c.todos)
 	if err != nil {

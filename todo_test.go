@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+// Constructor - lets each test set up its own state
+func NewMockTodoOperator(initialTodos Todos) *MockTodoOperator {
+	return &MockTodoOperator{
+		core: &CoreFunctionOperator{
+			todos:   &initialTodos,
+			storage: NewMemoryStorage[Todos](initialTodos),
+		},
+	}
+}
+
 // In mock/mock_operator.go
 type MockTodoOperator struct {
 	// Test tracking fields
@@ -22,20 +32,21 @@ type MockTodoOperator struct {
 	ToggleWasCalled bool
 	ToggleIndex     int
 	mockTodos       Todos
+	core            *CoreFunctionOperator
 }
 
-var mockTodos = []Todo{
+var MockTodos = []Todo{
 	{
 		Title:     "buy milk",
 		Completed: false,
-		CreatedAt: time.Now(),
+		CreatedAt: time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC),
 		Priority:  1,
 		Tags:      []string{"shopping"},
 	},
 	{
 		Title:       "buy video games",
 		Completed:   true,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC),
 		CompletedAt: &time.Time{}, // or nil if not completed
 		Priority:    2,
 		Tags:        []string{"shopping", "entertainment"},
@@ -44,14 +55,16 @@ var mockTodos = []Todo{
 
 // These method implementations make it satisfy the TodoOperator interface
 func (m *MockTodoOperator) AddTodo(title string) error {
+	fmt.Printf("Checking what is being passed through: %s\n", title)
 	m.AddWasCalled = true
 	if m.ShouldError {
 		return errors.New("Error")
 	}
-
-	m.AddedTitles = append(m.AddedTitles, title)
+	err := m.core.AddTodo(title)
+	if err != nil {
+		return err
+	}
 	return nil
-
 }
 
 func (m *MockTodoOperator) DeleteTodo(id int) error {
@@ -118,20 +131,21 @@ func (m *MockTodoOperator) Print() {
 
 // If you prefer separate test functions:
 func TestCommandFlags_Execute_Add(t *testing.T) {
-	mock := &MockTodoOperator{}
-
+	mock := NewMockTodoOperator(MockTodos)
+	fmt.Printf("Checking what is the Todo struct in my mock: %v\n", mock.core.todos)
 	flags := CommandFlags{
-		Add:    "buy milk",
+		Add:    "buy chocolate",
 		Filter: -1,
 		Del:    -1,
 		Toggle: -1,
 	}
 
 	flags.Execute(mock)
+	fmt.Printf("Checking what is the Todo struct in my mock after execute: %v\n", mock.core.todos)
 
 	assert.True(t, mock.AddWasCalled)
-	assert.Equal(t, 1, len(mock.AddedTitles))
-	assert.Equal(t, "buy milk", mock.AddedTitles[0])
+	assert.Equal(t, 3, len(*mock.core.todos))
+	assert.Equal(t, "buy chocolate", (*mock.core.todos)[2].Title)
 }
 
 func TestCommandFlags_Execute_Delete(t *testing.T) {

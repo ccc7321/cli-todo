@@ -5,15 +5,15 @@ import (
 	"os"
 )
 
-type Storage[T any] struct {
+type FileStorage[T any] struct {
 	Filename string
 }
 
-func NewStorage[T any](filename string) *Storage[T] {
-	return &Storage[T]{Filename: filename}
+func NewStorage[T any](filename string) *FileStorage[T] {
+	return &FileStorage[T]{Filename: filename}
 }
 
-func (s *Storage[T]) Save(data T) error {
+func (s *FileStorage[T]) Save(data T) error {
 	filedata, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (s *Storage[T]) Save(data T) error {
 	return os.WriteFile(s.Filename, filedata, 0644)
 }
 
-func (s *Storage[T]) Load(data *T) error {
+func (s *FileStorage[T]) Load(data *T) error {
 	filedata, err := os.ReadFile(s.Filename)
 	if err != nil {
 		return err
