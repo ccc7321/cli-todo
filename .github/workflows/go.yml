@@ -1,3 +1,11 @@
+name: Test PR to see why this is not running
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
