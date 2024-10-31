@@ -1,16 +1,13 @@
 name: Test PR to see why this is not running
-
 on:
   pull_request:
     branches: [ "master" ]
   push:
     branches: [ "master" ]
-
-
 jobs:
   test:
     name: test go.yml to see why ubuntu-latest is not being initialised
-    runs-on: [self-hosted, ubuntu-latest]    # Make sure this line says ubuntu-latest, not self-hosted
+    runs-on: [self-hosted, macos-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
