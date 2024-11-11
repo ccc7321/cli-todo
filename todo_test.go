@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cli-todo/cmd"
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -133,7 +134,7 @@ func (m *MockTodoOperator) Print() {
 func TestCommandFlags_Execute_Add(t *testing.T) {
 	mock := NewMockTodoOperator(MockTodos)
 	fmt.Printf("Checking what is the Todo struct in my mock: %v\n", mock.core.todos)
-	flags := CommandFlags{
+	flags := cmd.CommandFlags{
 		Add:    "buy chocolate",
 		Filter: -1,
 		Del:    -1,
@@ -168,7 +169,7 @@ func TestCommandFlags_Execute_Delete(t *testing.T) {
 		ShouldError: false,
 	}
 
-	flags := CommandFlags{
+	flags := cmd.CommandFlags{
 		Add:    "",
 		Filter: -1,
 		Del:    0,
@@ -200,7 +201,7 @@ func TestCommandFlags_Execute_Edit(t *testing.T) {
 		mockTodos:   initialTodos,
 		ShouldError: false,
 	}
-	flags := CommandFlags{
+	flags := cmd.CommandFlags{
 		Filter: -1,
 		Del:    -1,
 		Toggle: -1,
@@ -232,7 +233,7 @@ func TestCommandFlags_Execute_Toggle(t *testing.T) {
 		mockTodos:   initialTodos,
 		ShouldError: false,
 	}
-	flags := CommandFlags{
+	flags := cmd.CommandFlags{
 		Filter: -1,
 		Del:    -1,
 		Toggle: 0,
